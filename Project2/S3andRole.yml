@@ -1,0 +1,52 @@
+Resources:
+  #instace profile contains the IAM Role name(s) that we want to associate to our auto scaling EC2 Servers
+  ProfileWithRolesForOurApp:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref UdaRoleS3
+
+  iamPolicyS3:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: udaAccesss3
+      Roles:
+        - !Ref UdaRoleS3
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:ListBucketMultipartUploads
+              - s3:ListBucketVersions
+              - s3:GetBucketCORS
+              - s3:ListBucket
+              - s3:GetBucketAcl
+              - s3:GetBucketPolicy
+              - s3:ListMultipartUploadParts
+            Resource:
+              - arn:aws:s3:::udagramprojbucket/*
+              - arn:aws:s3:::udagramprojbucket
+
+  UdaRoleS3:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Access S3 from EC2 read only
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      RoleName: udaAccessS3RORole
+
+Outputs:
+  udaProfileWithRoles:
+    Description: A reference to the created VP
+    Value: !Ref ProfileWithRolesForOurApp
+    Export:
+      Name: udaProfileEc2Roles
